@@ -6,7 +6,10 @@ function flash_session_add($key,  $obj)
 }
 
 function flash_session_read($key) {
-    $obj = $_SESSION['flash'][$key];
-    unset($_SESSION['flash'][$key]);
-    return $obj;
+    if (array_key_exists($key, $_SESSION['flash'])) {
+        $flash_obj = $_SESSION['flash'][$key];
+        unset($_SESSION['flash'][$key]);
+        return $flash_obj;
+    }
+    return  [];
 }

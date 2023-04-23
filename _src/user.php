@@ -13,7 +13,7 @@ function login($username , $password) {
     return $result;
 }
 
-function createUser($email, $password, $firstname, $lastname, $role = 'USER') {
+function create_user($email, $password, $firstname, $lastname, $role = 'USER') {
     $conn = db_connect();
     $prp = $conn->prepare(
         "INSET INTO users (firstname, lastname, email, passwd, roles) VALUES (?,?,?,?,?)"
@@ -31,25 +31,31 @@ function getUserByEmail($email) {
 }
 
 
-function checkEmail() {
-    if (empty($_POST['email'])) return ['code' => 400, 'message' => 'Email is missing', 'pass' => false];
+function check_email() {
+    if (empty($_POST['email'])) return ['code' => 400, 'message' => 'Email is missing', 'valid' => false];
     $email = $_POST['email'];
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) return ['code' => 400, 'message' => 'Invalid Email format', 'pass' => false];
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) return ['code' => 400, 'message' => 'Invalid Email format', 'valid' => false];
     // Check if unique
     $conn = db_connect();
     $prp = $conn->prepare("SELECT * FROM users u WHERE u.email like ?");
     $prp->execute([$email]);
     $result = $prp->fetch(PDO::FETCH_ASSOC);
-    if (!empty($result)) return ['code' => 400, 'message' => 'Email already exists', 'pass' => false];
-    return ['code' => 200, 'message' => 'Email valid', 'pass' => true];
+    if (!empty($result)) return ['code' => 400, 'message' => 'Email already exists', 'valid' => false];
+    return ['code' => 200, 'message' => 'Email valid', 'valid' => true];
 }
 
-function checkName($key, $max_length = 100, $min_length = 0, $numbers_allowed = false) {
+function check_name($key, $max_length = 100, $min_length = 3, $numbers_allowed = false) {
     // first or last name
     if (empty($_POST[$key])) return ['code' => 400, 'message' =>  $key.' is missing', 'valid' => false];
     $key_val = $_POST[$key];
     if (!$numbers_allowed && contains_numbers($key_val)) return ['code' => 400, 'message' =>  "$key is numeric", 'valid' => false];
-    if (count($key_val) < $min_length) return ['code' => 400, 'message' =>  "$key length less than $min_length", 'valid' => false];
-    if (count($key_val) > $max_length) return ['code' => 400, 'message' =>  "$key length greater than $max_length", 'valid' => false];
+    if (strlen($key_val) < $min_length) return ['code' => 400, 'message' =>  "$key length less than $min_length", 'valid' => false];
+    if (strlen($key_val) > $max_length) return ['code' => 400, 'message' =>  "$key length greater than $max_length", 'valid' => false];
     return ['code' => 200, 'message' =>  "$key is valid", 'valid' => true];
+}
+
+function check_password() {
+    $chk_name = check_name('password', 16, 8, true);
+    if (!$chk_name['valid']) return $chk_name;
+    return  ['code' => 200,'message' =>  "password is valid", 'valid' => true];
 }

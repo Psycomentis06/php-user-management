@@ -1,15 +1,38 @@
 <?php
+session_start();
 require_once $_SERVER['DOCUMENT_ROOT'].'/_src/user.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/_src/session.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/_src/utils.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/_src/form.php';
+
 $html_title = 'Register'; // HTML title
 include_once '../_inc/html_start.php'; // insert html
 require_once $_SERVER['DOCUMENT_ROOT'].'/_inc/html_start.php';
 
 // PHP Logic
 
+if (is_form_submitted()) {
+    // validate form fields
+    $chk_email = check_email();
+    $chk_password = check_password();
+    $chk_firstname = check_name('first_name');
+    $chk_lastname = check_name('last_name');
+    flash_session_add('email', $chk_email);
+    flash_session_add('first_name', $chk_firstname);
+    flash_session_add('last_name', $chk_lastname);
+    flash_session_add('password', $chk_password);
 
-
-if (!empty($_POST)) {
-    // Check user input
+    $form_valid = is_form_valid([$chk_email, $chk_password, $chk_firstname, $chk_lastname]);
+    if ($form_valid) {
+        die('register user');
+        // create user
+        create_user(
+            $_POST['email'],
+            $_POST['password'],
+            $_POST['first_name'],
+            $_POST['last_name']
+        );
+    }
 }
 
 ?>
@@ -25,42 +48,26 @@ if (!empty($_POST)) {
 
                                 <p class="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Sign up</p>
 
-                                <form class="mx-1 mx-md-4">
+                                <form novalidate method="post" class="mx-1 mx-md-4">
 
-                                    <div class="d-flex flex-row align-items-center mb-4">
-                                        <i class="fas fa-user fa-lg me-3 fa-fw"></i>
-                                        <div class="form-outline flex-fill mb-0">
-                                            <input type="text" id="form3Example1c" class="form-control" />
-                                            <label class="form-label" for="form3Example1c">Your First Name</label>
-                                        </div>
+                                    <div style="margin-bottom: 40px">
+                                        <?php render_input('text', 'first_name', 'First Name', '', 'flex-fill mb-0'); ?>
                                     </div>
 
-                                    <div class="d-flex flex-row align-items-center mb-4">
-                                        <i class="fas fa-user fa-lg me-3 fa-fw"></i>
-                                        <div class="form-outline flex-fill mb-0">
-                                            <input type="text" id="form3Example1c" class="form-control" />
-                                            <label class="form-label" for="form3Example1c">Your Last Name</label>
-                                        </div>
+                                    <div style="margin-bottom: 40px">
+                                        <?php render_input('text', 'last_name', 'Last Name', '', 'flex-fill mb-0'); ?>
                                     </div>
 
-                                    <div class="d-flex flex-row align-items-center mb-4">
-                                        <i class="fas fa-envelope fa-lg me-3 fa-fw"></i>
-                                        <div class="form-outline flex-fill mb-0">
-                                            <input type="email" id="form3Example3c" class="form-control" />
-                                            <label class="form-label" for="form3Example3c">Your Email</label>
-                                        </div>
+                                    <div style="margin-bottom: 40px">
+                                        <?php render_input('text', 'email', 'Email', '', 'flex-fill mb-0'); ?>
                                     </div>
 
-                                    <div class="d-flex flex-row align-items-center mb-4">
-                                        <i class="fas fa-lock fa-lg me-3 fa-fw"></i>
-                                        <div class="form-outline flex-fill mb-0">
-                                            <input type="password" id="form3Example4c" class="form-control" />
-                                            <label class="form-label" for="form3Example4c">Password</label>
-                                        </div>
+                                    <div style="margin-bottom: 40px">
+                                        <?php render_input('password', 'password', 'Password', '', 'flex-fill mb-0'); ?>
                                     </div>
 
                                     <div class="d-flex justify-content-center mx-4 mb-3 mb-lg-4">
-                                        <button type="button" class="btn btn-primary btn-lg">Register</button>
+                                        <button type="submit" class="btn btn-primary btn-lg">Register</button>
                                     </div>
 
                                 </form>
