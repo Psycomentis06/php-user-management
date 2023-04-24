@@ -9,7 +9,7 @@ require_once $_SERVER['DOCUMENT_ROOT'].'/_inc/html_start.php'; // insert html
 
 ?>
 
-<section>
+<section class="profile-page">
 <?php
 // check session for flash form register
 $register_flash = flash_session_read('form_register');
@@ -26,8 +26,12 @@ if (!empty($register_flash)) {
             '.$register_flash['message'].'
           </div>';
 }
+// Set up profile params
+$profile_id = 0;
+$profile_editable = true;
+// load profile component
+require_once $_SERVER['DOCUMENT_ROOT'].'/_inc/profile.php';
 ?>
-</section>
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'].'/_inc/html_end.php';
 ?>

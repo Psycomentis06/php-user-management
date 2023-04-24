@@ -4,13 +4,31 @@ require_once $_SERVER['DOCUMENT_ROOT'].'/_src/database.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/_src/utils.php';
 
 function login($username , $password) {
-    $conn = db_connect();
-    $prp = $conn->prepare("SELECT * FROM users u WHERE u.email like ?");
-    $prp->execute([$username]);
-    $result = $prp->fetch(PDO::FETCH_ASSOC);
-    if (empty($result)) return false;
-    if ($result['passwd'] != $password) return false;
-    return $result;
+    $user = getUserByEmail($username);
+    if (empty($user)) return false;
+    if ($user['passwd'] != $password) return false;
+    return $user;
+}
+
+function logout() {
+    unset($_SESSION['user']);
+    unset($_COOKIE['user']);
+}
+
+function is_logged_in()
+{
+    if (isset($_SESSION['user']))
+        return true;
+    else {
+        if (isset($_COOKIE['user'])) {
+            $user = getUserById($_COOKIE['user']);
+            if (!empty($user)) {
+                $_SESSION['user'] = $user;
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 function create_user($email, $password, $firstname, $lastname, $role = 'USER') {
@@ -27,8 +45,19 @@ function create_user($email, $password, $firstname, $lastname, $role = 'USER') {
 }
 
 function getUserByEmail($email) {
-
+    $conn = db_connect();
+    $prp = $conn->prepare("SELECT id, passwd, firstname, lastname, email, roles, activatedAt FROM users u WHERE u.email like ?");
+    $prp->execute([$email]);
+    return $prp->fetch(PDO::FETCH_ASSOC);
 }
+
+function getUserById($id) {
+    $conn = db_connect();
+    $prp = $conn->prepare("SELECT id, passwd, firstname, lastname, email, roles, activatedAt FROM users u WHERE u.id = ?");
+    $prp->execute([$id]);
+    return $prp->fetch(PDO::FETCH_ASSOC);
+}
+
 
 
 function check_email() {

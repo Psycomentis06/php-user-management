@@ -1,3 +1,7 @@
+<?php
+require_once $_SERVER['DOCUMENT_ROOT'].'/_src/utils.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/_src/user.php';
+?>
 <!doctype html>
 <html lang="en">
 <head>
@@ -21,8 +25,18 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.css"
         rel="stylesheet"
     />
+    <link rel="stylesheet" href="<?php echo get_server_address() . '/style/style.css' ?>">
     <title>
         <?php echo $html_title ?? 'Title' ?>
     </title>
 </head>
 <body>
+<?php
+
+if (is_logged_in()) {
+    $user = getUserById($_SESSION['user']['id']);
+    if (!empty($user)) {
+        if (empty($user['activatedAt']))
+            echo '<p class="alert alert-warning">Please activate your account via the link sent to your E-mail.</p>';
+    }
+}

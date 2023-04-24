@@ -1,0 +1,17 @@
+.login-page {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-page .login-section {
+    width: 70%;
+}
+
+@media (max-width: 992px) {
+    .login-page .login-section {
+        width: 90%;
+    }
+}
