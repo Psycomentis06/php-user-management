@@ -27,11 +27,17 @@ if (!empty($register_flash)) {
           </div>';
 }
 // Set up profile params
-$profile_id = 0;
-$profile_editable = true;
-// load profile component
-require_once $_SERVER['DOCUMENT_ROOT'].'/_inc/profile.php';
+if (is_logged_in()) {
+    $profile_id = $_SESSION['user']['id'];
+    $profile_editable = true;
+    // load profile component
+    require_once $_SERVER['DOCUMENT_ROOT'] . '/_inc/profile.php';
+} else {
+    flash_session_add('form_login', ['message' => 'You must be signed to access your profile.', 'valid' => false, 'code' => 402]);
+    redirect_to(get_server_address(). '/auth/login.php');
+}
 ?>
+
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'].'/_inc/html_end.php';
 ?>
