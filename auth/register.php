@@ -6,8 +6,7 @@ require_once $_SERVER['DOCUMENT_ROOT'].'/_src/utils.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/_src/form.php';
 
 $html_title = 'Register'; // HTML title
-include_once '../_inc/html_start.php'; // insert html
-require_once $_SERVER['DOCUMENT_ROOT'].'/_inc/html_start.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/_inc/html_start.php'; // insert html
 
 // PHP Logic
 
@@ -24,14 +23,19 @@ if (is_form_submitted()) {
 
     $form_valid = is_form_valid([$chk_email, $chk_password, $chk_firstname, $chk_lastname]);
     if ($form_valid) {
-        die('register user');
         // create user
-        create_user(
+        $user_val = create_user(
             $_POST['email'],
             $_POST['password'],
             $_POST['first_name'],
             $_POST['last_name']
         );
+        if ($user_val) {
+            flash_session_add('form_register', ['valid' => true, 'message' => ' User Created Successfully', 'code' => 200]);
+            redirect_to( get_server_address(). '/user/profile.php');
+        } else {
+            flash_session_add('form_register', ['valid' => false,'message' =>'Error Creating New User', 'code' => 400]);
+        }
     }
 }
 
@@ -48,6 +52,25 @@ if (is_form_submitted()) {
 
                                 <p class="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Sign up</p>
 
+                                <?php
+                                    // check session for flash form register
+                                    $register_flash = flash_session_read('form_register');
+                                    flash_session_add('form_register', $register_flash);
+                                    if (!empty($register_flash)) {
+                                        $alert_type_classname = '';
+                                        if ($register_flash['valid']) {
+                                            // echo bootstrap alert
+                                            $alert_type_classname = 'alert-success';
+                                        } else {
+                                           $alert_type_classname = 'alert-danger';
+                                        }
+                                        echo '
+                                                    <div class="alert '. $alert_type_classname .' alert-dismissible fade show">
+                                                        '.$register_flash['message'].'
+                                                    </div>                                                    
+                                            ';
+                                    }
+                                ?>
                                 <form novalidate method="post" class="mx-1 mx-md-4">
 
                                     <div style="margin-bottom: 40px">

@@ -13,7 +13,7 @@ function is_form_submitted() {
     return $_SERVER['REQUEST_METHOD'] == 'POST';
 }
 
-function render_input($type = 'text', $name = 'input', $label = 'Input', $value = '', $wrapper_class = '', $input_class = '') {
+function render_input($type = 'text', $name = 'input', $label = 'Input', $value = '', $wrapper_class = '', $input_class = '', $saved_values = true) {
     $feedback_html_txt =  '';
     $form_input_class = '';
     if (is_form_submitted()) {
@@ -26,6 +26,9 @@ function render_input($type = 'text', $name = 'input', $label = 'Input', $value 
                 $form_input_class = 'is-valid';
             }
             $feedback_html_txt = '<div class="' . $feedback_classname . '">' . $flash['message'] . '</div>';
+        }
+        if ($saved_values) {
+            $value = $_POST[$name] ?? '';
         }
     }
     $form_input_class .= ' '. $input_class;
