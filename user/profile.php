@@ -29,7 +29,7 @@ if (!empty($register_flash)) {
 // Set up profile params
 if (is_logged_in()) {
     $profile_id = $_SESSION['user']['id'];
-    $profile_editable = true;
+    $profile_editable = isset($_GET['edit']) && $_GET['edit'] == 1;
     // load profile component
     require_once $_SERVER['DOCUMENT_ROOT'] . '/_inc/profile.php';
 } else {

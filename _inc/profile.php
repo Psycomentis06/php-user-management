@@ -1,9 +1,18 @@
 <?php
 
 require_once $_SERVER['DOCUMENT_ROOT'].'/_src/form.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/_src/user.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/_src/utils.php';
+
+$user = getUserById($profile_id ?? 0, ['*']);
+if (empty($user)) {
+    flash_session_add('form_login', ['valid' => false, 'message' => 'Given user is not found', 'code' => 404]);
+    redirect_to(get_server_address() . '/auth/login.php');
+}
 ?>
 <section class="profile-component" style="background-color: #eee;">
         <div class="container py-5">
+            <form method="post">
             <div class="row">
                 <div class="col">
                     <nav aria-label="breadcrumb" class="bg-light rounded-3 p-3 mb-4">
@@ -22,12 +31,23 @@ require_once $_SERVER['DOCUMENT_ROOT'].'/_src/form.php';
                         <div class="card-body text-center">
                             <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp" alt="avatar"
                                  class="rounded-circle img-fluid" style="width: 150px;">
-                            <h5 class="my-3">John Smith</h5>
+                            <h5 class="my-3"><?php echo $user['firstname']. ' '. $user['lastname'] ?></h5>
                             <p class="text-muted mb-1">Full Stack Developer</p>
                             <p class="text-muted mb-4">Bay Area, San Francisco, CA</p>
                             <div class="d-flex justify-content-center mb-2">
-                                <button type="button" class="btn btn-success">Edit</button>
-                                <button type="button" class="btn btn-outline-danger ms-1">Delete</button>
+                                <?php
+                                    if ($profile_editable ?? false) {
+                                        echo '
+                                        <button type="button" class="btn btn-primary ms-1" onclick="cancel_edit()">Cancel</button>
+                                        <button type="submit" class="btn btn-outline-info ms-1">Submit</button>
+                                        ';
+                                    } else {
+                                        echo '
+                                        <button type="button" class="btn btn-success" onclick="edit_redirect()">Edit</button>
+                                        <button type="button" class="btn btn-outline-danger ms-1" onclick="delete_account_modal()">Delete</button>
+                                        ';
+                                    }
+                                ?>
                             </div>
                         </div>
                     </div>
@@ -72,18 +92,18 @@ require_once $_SERVER['DOCUMENT_ROOT'].'/_src/form.php';
                                         echo '<div class="row"> 
                                                 <div class="col-md-6">
                                             ';
-                                        render_input('text', 'first_name', 'First name', 'Jonathan', '', '', '');
+                                        render_input('text', 'first_name', 'First name', $user['firstname'], '', '', '');
                                         echo '
                                             </div>
                                             <div class="col-md-6">
                                             ';
-                                        render_input('text', 'last_name', 'Last name', 'Smith', '', '', '');
+                                        render_input('text', 'last_name', 'Last name', $user['lastname'], '', '', '');
                                         echo '
                                             </div>
                                         ';
                                         echo '</div>';
                                     } else {
-                                        echo '<p class="text-muted mb-0">Johnatan Smith</p>';
+                                        echo '<p class="text-muted mb-0">'. $user['firstname'] .' '. $user['lastname'] .'</p>';
                                     }
                                     ?>
                                 </div>
@@ -94,7 +114,15 @@ require_once $_SERVER['DOCUMENT_ROOT'].'/_src/form.php';
                                     <p class="mb-0">Email</p>
                                 </div>
                                 <div class="col-sm-9">
-                                    <p class="text-muted mb-0">example@example.com</p>
+                                    <?php
+                                        if ($profile_editable ?? false) {
+                                            render_input('email', 'email', 'Email', $user['email']);
+                                        } else {
+                                            echo '
+                                            <p class="text-muted mb-0">'. $user['email'] .'</p>
+                                            ';
+                                        }
+                                    ?>
                                 </div>
                             </div>
                             <hr>
@@ -196,5 +224,31 @@ require_once $_SERVER['DOCUMENT_ROOT'].'/_src/form.php';
                     </div>
                 </div>
             </div>
+            </form>
         </div>
     </section>
+<script>
+    function edit_redirect() {
+       if ('URLSearchParams' in window) {
+            let searchParams = new URLSearchParams(window.location.search);
+            searchParams.set("edit", 1);
+            window.location.search = searchParams.toString();
+        }
+    }
+
+    function cancel_edit() {
+        if (!confirm('You are going to cancel the changes?!')) {
+            return false;
+        }
+        if ('URLSearchParams' in window) {
+            let searchParams = new URLSearchParams(window.location.search);
+            searchParams.delete("edit");
+            window.location.search = searchParams.toString();
+        }
+        return true
+    }
+
+    function delete_account_modal() {
+        confirm('You are going to remove this account');
+    }
+</script>

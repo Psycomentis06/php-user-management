@@ -1,5 +1,6 @@
 <?php
 session_start();
+ob_start(); // to solve header already sent caused by set_cookie function
 require_once $_SERVER['DOCUMENT_ROOT'].'/_src/user.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/_src/form.php';
 $html_title = 'Login'; // HTML title
@@ -28,14 +29,16 @@ if (is_form_submitted()) {
             flash_session_add('form_login', ['valid' => false, 'message' => 'User not found', 'code' => 404]);
         } else {
             if (!empty($_POST['remember_me'])) {
-                $_COOKIE['user_id'] = $user['id'];
+                //$_COOKIE['user_id'] = $user['id'];
+                // set cookie for 30 days
+                setcookie('user_id', $user['id'], time() + 86400 * 30, '/');
             }
             $_SESSION['user'] = $user;
             redirect_to( get_server_address(). '/user/profile.php');
         }
     }
 }
-
+ob_end_flush(); // closing the buffer
 ?>
 <!-- Body -->
 <section class="login-page">
